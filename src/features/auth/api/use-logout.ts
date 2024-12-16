@@ -1,11 +1,14 @@
 "use client"
 
 import { client } from "@/lib/rpc"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 
 export function useLogout() {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -13,10 +16,13 @@ export function useLogout() {
 
       if (!response.ok) throw new Error("")
     },
-    onSuccess: async () => {
-      router.refresh()
+    onSuccess: () => {
+      startTransition(() => {
+        router.push("/sign-in")
+        void queryClient.clear()
+      })
     }
   })
 
-  return mutation
+  return { logout: mutation.mutate, isPending: mutation.isPending || isPending }
 }

@@ -3,6 +3,7 @@ import { Geist_Mono } from "next/font/google"
 import { ViewTransitions } from "next-view-transitions"
 import "./globals.css"
 import QueryProvider from "@/components/query-provider"
+import { Toaster } from "@/components/ui/sonner"
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -22,8 +23,11 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en">
-        <body className={`${geistMono.className} antialiased min-h-screen`}>
-          <QueryProvider>{children}</QueryProvider>
+        <body className={`${geistMono.className} antialiased`}>
+          <div>
+            <QueryProvider>{children}</QueryProvider>
+          </div>
+          <Toaster />
         </body>
       </html>
     </ViewTransitions>

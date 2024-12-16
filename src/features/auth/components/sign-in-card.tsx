@@ -11,13 +11,16 @@ import {
   FormMessage
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { zodResolver } from "@hookform/resolvers/zod"
+import useForm from "@/hooks/useForm"
+import { client } from "@/lib/rpc"
+import { Loader2Icon } from "lucide-react"
 import { Link } from "next-view-transitions"
-import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 import { FaGithub } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import { loginSchema } from "../schemas"
-import { client } from "@/lib/rpc"
+import { toast } from "sonner"
 
 export default function SignInCard() {
   return (
@@ -71,16 +74,25 @@ function SignInForm() {
   "use no memo"
 
   const form = useForm({
-    resolver: zodResolver(loginSchema),
+    schema: loginSchema,
     defaultValues: {
       email: "",
       password: ""
     }
   })
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = form.handleSubmit(async values => {
-    const response = await client.api.auth.login.$post({ json: values })
-    const data = await response.json()
+  const handleSubmit = form.handleSubmit(values => {
+    startTransition(async () => {
+      const response = await client.api.auth.login.$post({ json: values })
+      if (response.ok) {
+        toast.success("Logged in")
+        router.push("/")
+      } else {
+        toast.error(await response.text())
+      }
+    })
   })
 
   return (
@@ -93,9 +105,10 @@ function SignInForm() {
             <FormItem>
               <FormControl>
                 <Input
+                  {...field}
                   type="email"
                   placeholder="Enter email address"
-                  {...field}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />
@@ -109,16 +122,18 @@ function SignInForm() {
             <FormItem>
               <FormControl>
                 <Input
+                  {...field}
                   type="password"
                   placeholder="Enter password"
-                  {...field}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={false} size="lg" className="w-full">
+        <Button type="submit" disabled={isPending} size="lg" className="w-full">
+          {isPending && <Loader2Icon className="animate-spin" />}
           Login
         </Button>
       </form>

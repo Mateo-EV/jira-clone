@@ -6,19 +6,20 @@ import { Hono } from "hono"
 import { deleteCookie, setCookie } from "hono/cookie"
 import { sign } from "hono/jwt"
 import { AUTH_COOKIE, HASH_CONFIGURATION } from "../constant"
-import { createUser, existsUserEmail, getUserByEmail } from "../data"
+import { createUser, existsUserEmail, getUserByEmail } from "../service"
 import { loginSchema, registerSchema } from "../schemas"
 import { sessionMiddleware } from "./session"
+import { HTTPException } from "hono/http-exception"
 
 const extraExpTime = 3600 * 24 * 15
 
 const authRouter = new Hono()
   .post("/login", zValidator("json", loginSchema), async c => {
     const { email, password } = c.req.valid("json")
-
     const user = await getUserByEmail(email)
 
-    if (!user) return c.json({ error: "Incorrect email or password" }, 400)
+    if (!user)
+      throw new HTTPException(400, { message: "Incorrect email or password" })
 
     const isValidPassword = await verifyPassword(
       user.password,
@@ -27,7 +28,7 @@ const authRouter = new Hono()
     )
 
     if (!isValidPassword)
-      return c.json({ error: "Incorrect email or password" }, 400)
+      throw new HTTPException(400, { message: "Incorrect email or password" })
 
     const now = Math.floor(Date.now() / 1000)
 
@@ -57,7 +58,7 @@ const authRouter = new Hono()
     const { email, name, password } = c.req.valid("json")
 
     if (await existsUserEmail(email)) {
-      return c.json({ error: "Email already exists" }, 400)
+      throw new HTTPException(400, { message: "Email already exists" })
     }
 
     const passwordHashed = await hash(password, HASH_CONFIGURATION)

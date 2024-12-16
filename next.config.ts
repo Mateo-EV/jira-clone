@@ -6,6 +6,20 @@ const nextConfig: NextConfig = {
       compilationMode: "all"
     }
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/a/*"
+      },
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+        pathname: "/f/*"
+      }
+    ]
+  },
   serverExternalPackages: ["@node-rs/argon2"]
 }
 

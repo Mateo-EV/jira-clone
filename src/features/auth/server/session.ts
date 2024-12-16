@@ -6,6 +6,7 @@ import { getCookie } from "hono/cookie"
 import { AUTH_COOKIE } from "../constant"
 import { verify } from "hono/jwt"
 import { env } from "@/data/env"
+import { HTTPException } from "hono/http-exception"
 
 export type Session = {
   id: string
@@ -24,7 +25,7 @@ export const sessionMiddleware =
     try {
       const token = getCookie(c, AUTH_COOKIE)
 
-      if (!token) return c.json({ error: "Unauthorized" }, 401)
+      if (!token) throw new HTTPException(401, { message: "Unauthorized" })
 
       const decoded = await verify(token, env.JWT_SECRET_KEY)
 
@@ -33,7 +34,7 @@ export const sessionMiddleware =
         typeof decoded.name !== "string" ||
         typeof decoded.email !== "string"
       )
-        return c.json({ error: "Unauthorized" }, 401)
+        throw new HTTPException(401, { message: "Unauthorized" })
 
       c.set("user", {
         id: decoded.sub,
@@ -41,9 +42,9 @@ export const sessionMiddleware =
         email: decoded.email
       })
 
-      next()
+      await next()
     } catch (error) {
       console.error("Error verifying token:", error)
-      return c.json({ error: "Unauthorized" }, 401)
+      throw new HTTPException(401, { message: "Unauthorized" })
     }
   })
