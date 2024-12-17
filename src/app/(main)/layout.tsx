@@ -2,6 +2,7 @@ import Navbar from "@/components/navbar"
 import Sidebar from "@/components/sidebar"
 import AuthProvider from "@/features/auth/providers/AuthProvider"
 import { getSession } from "@/features/auth/server/next-session"
+import CreateWorkspaceModal from "@/features/workspaces/components/create-workspace-modal"
 import { getWorkspacesByUser } from "@/features/workspaces/service"
 import { getQueryClient } from "@/lib/query"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
@@ -27,6 +28,7 @@ export default async function MainLayout({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <AuthProvider session={session}>
         <div className="min-h-screen">
+          <CreateWorkspaceModal />
           <div className="flex size-full">
             <div className="fixed left-0 top-0 hidden lg:block lg:w-[264px] overflow-y-auto bottom-0">
               <Sidebar />

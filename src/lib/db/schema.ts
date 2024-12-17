@@ -1,12 +1,6 @@
 import { createId } from "@paralleldrive/cuid2"
 import { relations } from "drizzle-orm"
-import {
-  index,
-  pgTable,
-  primaryKey,
-  timestamp,
-  varchar
-} from "drizzle-orm/pg-core"
+import { pgTable, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core"
 
 const id = varchar("id", { length: 30 })
   .primaryKey()
@@ -73,8 +67,7 @@ export const membersTable = pgTable(
     role: varchar("role", { enum: ["admin", "member"] }).notNull()
   },
   t => ({
-    primary: primaryKey({ columns: [t.userId, t.workspaceId] }),
-    indexUserId: index().on(t.userId)
+    primary: primaryKey({ columns: [t.userId, t.workspaceId] })
   })
 )
 

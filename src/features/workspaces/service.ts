@@ -10,10 +10,6 @@ export async function createWorkspace(
   await db.insert(workspacesTable).values(workspace)
 }
 
-export async function createMember(member: typeof membersTable.$inferInsert) {
-  await db.insert(membersTable).values(member)
-}
-
 export async function getWorkspacesByUser(userId: string) {
   return await db
     .select({
@@ -26,6 +22,21 @@ export async function getWorkspacesByUser(userId: string) {
     .where(eq(membersTable.userId, userId))
 }
 
+export async function getFirstWorkspaceByUser(userId: string) {
+  const [workspace] = await db
+    .select({
+      id: workspacesTable.id,
+      name: workspacesTable.name,
+      image: workspacesTable.image
+    })
+    .from(workspacesTable)
+    .innerJoin(membersTable, eq(membersTable.workspaceId, workspacesTable.id))
+    .where(eq(membersTable.userId, userId))
+    .limit(1)
+
+  return (workspace ?? null) as typeof workspace | null
+}
+
 export function generateInviteCode(length: number) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -35,4 +46,30 @@ export function generateInviteCode(length: number) {
   }
 
   return result
+}
+
+export async function getWorkspaceById(
+  workspaceId: string,
+  columns?: ColumnsSelection<typeof workspacesTable.$inferSelect>
+) {
+  return (
+    (await db.query.workspacesTable.findFirst({
+      where: eq(workspacesTable.id, workspaceId),
+      columns
+    })) ?? null
+  )
+}
+
+export async function updateWorkspaceById(
+  workspaceId: string,
+  workspace: Undefine<typeof workspacesTable.$inferSelect>
+) {
+  await db
+    .update(workspacesTable)
+    .set(workspace)
+    .where(eq(workspacesTable.id, workspaceId))
+}
+
+export async function deleteWorkspaceById(workspaceId: string) {
+  await db.delete(workspacesTable).where(eq(workspacesTable.id, workspaceId))
 }

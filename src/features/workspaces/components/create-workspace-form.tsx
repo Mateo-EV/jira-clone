@@ -1,9 +1,9 @@
 "use client"
 
-import useForm from "@/hooks/useForm"
-import { useCreateWorkspace } from "../api/use-create-workspace"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import DottedSeparator from "@/components/dotted-separator"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Form,
   FormControl,
@@ -13,15 +13,15 @@ import {
   FormMessage
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import useForm from "@/hooks/use-form"
+import { ImageIcon } from "lucide-react"
 import Image from "next/image"
-import { ImageIcon, XIcon } from "lucide-react"
 import { useRef } from "react"
+import { useCreateWorkspace } from "../api/use-create-workspace"
 import { createWorkspaceSchema } from "../schemas"
 
 type CreateWorkspaceFormProps = {
-  onCancel: () => void
+  onCancel?: () => void
 }
 
 export default function CreateWorkspaceForm({
@@ -37,8 +37,6 @@ export default function CreateWorkspaceForm({
   })
   const { mutate: createWorkspace, isPending } = useCreateWorkspace()
 
-  console.log(form.formState.errors)
-
   const handleSubmit = form.handleSubmit(({ name, image }) => {
     createWorkspace({
       form: { name, image: image instanceof File ? image : "" }
@@ -47,7 +45,7 @@ export default function CreateWorkspaceForm({
 
   return (
     <Card className="size-full border-none shadow-none">
-      <CardHeader>
+      <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create a new workspace
         </CardTitle>
@@ -98,6 +96,7 @@ export default function CreateWorkspaceForm({
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
+                className={onCancel ? "visible" : "invisible"}
               >
                 Cancel
               </Button>
@@ -142,13 +141,6 @@ function WorkspaceInputImage({
               height={72}
               alt="workspace-image"
             />
-            <button
-              type="button"
-              className="bg-red-500 rounded-md p-1 absolute top-0 right-0"
-              onClick={() => setFile(undefined)}
-            >
-              <XIcon className="size-4 text-primary-foreground" />
-            </button>
           </div>
         ) : (
           <Avatar className="size-[72px]">
@@ -170,16 +162,29 @@ function WorkspaceInputImage({
             disabled={isPending}
             ref={inputRef}
           />
-          <Button
-            type="button"
-            variant="teritary"
-            disabled={isPending}
-            size="xs"
-            className="w-fit mt-2"
-            onClick={() => inputRef.current.click()}
-          >
-            Upload Image
-          </Button>
+          {file ? (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isPending}
+              size="xs"
+              className="w-fit mt-2"
+              onClick={() => setFile(undefined)}
+            >
+              Remove Image
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="teritary"
+              disabled={isPending}
+              size="xs"
+              className="w-fit mt-2"
+              onClick={() => inputRef.current.click()}
+            >
+              Upload Image
+            </Button>
+          )}
         </div>
       </div>
     </div>
