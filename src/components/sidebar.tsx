@@ -5,6 +5,7 @@ import DottedSeparator from "./dotted-separator"
 import Navigation from "./navigation"
 import { Suspense } from "react"
 import { Skeleton } from "./ui/skeleton"
+import SidebarProjects from "@/features/projects/components/sidebar-projects"
 
 export default function Sidebar() {
   return (
@@ -18,6 +19,10 @@ export default function Sidebar() {
       </Suspense>
       <DottedSeparator className="my-4" />
       <Navigation />
+      <DottedSeparator className="my-4" />
+      <Suspense fallback={<Skeleton className="h-14 w-full" />}>
+        <SidebarProjects />
+      </Suspense>
     </aside>
   )
 }

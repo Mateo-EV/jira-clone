@@ -1,5 +1,6 @@
 import authRouter from "@/features/auth/server/route"
 import memberRouter from "@/features/members/server/route"
+import projectRouter from "@/features/projects/server/route"
 import workspaceRouter from "@/features/workspaces/server/route"
 import { Hono } from "hono"
 import { handle } from "hono/vercel"
@@ -11,6 +12,7 @@ const routes = app
   .route("/auth", authRouter)
   .route("/workspaces", workspaceRouter)
   .route("/members", memberRouter)
+  .route("/projects", projectRouter)
 
 export const GET = handle(app)
 export const POST = handle(app)

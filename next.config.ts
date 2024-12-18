@@ -18,7 +18,8 @@ const nextConfig: NextConfig = {
         hostname: "utfs.io",
         pathname: "/f/*"
       }
-    ]
+    ],
+    dangerouslyAllowSVG: true
   },
   serverExternalPackages: ["@node-rs/argon2"]
 }

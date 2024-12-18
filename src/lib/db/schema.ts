@@ -1,6 +1,12 @@
 import { createId } from "@paralleldrive/cuid2"
 import { relations } from "drizzle-orm"
-import { pgTable, primaryKey, timestamp, varchar } from "drizzle-orm/pg-core"
+import {
+  index,
+  pgTable,
+  primaryKey,
+  timestamp,
+  varchar
+} from "drizzle-orm/pg-core"
 
 const id = varchar("id", { length: 30 })
   .primaryKey()
@@ -45,7 +51,8 @@ export const workspacesTableRelations = relations(
       fields: [workspacesTable.creatorId],
       references: [usersTable.id]
     }),
-    members: many(membersTable)
+    members: many(membersTable),
+    projects: many(projectsTable)
   })
 )
 
@@ -78,6 +85,38 @@ export const membersTableRelations = relations(membersTable, ({ one }) => ({
   }),
   workspace: one(workspacesTable, {
     fields: [membersTable.workspaceId],
+    references: [workspacesTable.id]
+  })
+}))
+
+export const projectsTable = pgTable(
+  "projects",
+  {
+    id,
+    name: varchar("name", { length: 191 }).notNull(),
+    workspaceId: varchar("workspace_id", { length: 30 })
+      .references(() => workspacesTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade"
+      })
+      .notNull(),
+    image: varchar("image", { length: 191 }),
+    lastModifiedAt: timestamp("last_modified_at", {
+      mode: "date",
+      withTimezone: true,
+      precision: 0
+    })
+      .notNull()
+      .defaultNow()
+  },
+  t => ({
+    lastModifiedIndex: index().on(t.lastModifiedAt)
+  })
+)
+
+export const projectsTableRelations = relations(projectsTable, ({ one }) => ({
+  workspace: one(workspacesTable, {
+    fields: [projectsTable.workspaceId],
     references: [workspacesTable.id]
   })
 }))
