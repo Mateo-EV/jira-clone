@@ -15,7 +15,7 @@ type RequestType = InferRequestType<
 export function useUpdateMember(memberId: string, workspaceId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<ResponseType, Error, RequestType>({
+  return useMutation<ResponseType, string, RequestType>({
     mutationFn: async json => {
       const response = await client.api.members[":workspaceId"][":memberId"][
         "$patch"
@@ -34,8 +34,8 @@ export function useUpdateMember(memberId: string, workspaceId: string) {
       toast.success("Member updated")
       queryClient.invalidateQueries({ queryKey: ["members", workspaceId] })
     },
-    onError: () => {
-      toast.error("Failed to update member")
+    onError: msg => {
+      toast.error(msg)
     }
   })
 }

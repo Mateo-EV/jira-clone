@@ -42,7 +42,7 @@ const memberRouter = new Hono()
     if (!member) throw new HTTPException(401, { message: "Unauthorized" })
 
     const isAdmin = member.role === "admin"
-    const isSamePerson = member.userId !== memberIdToDelete
+    const isSamePerson = member.userId === memberIdToDelete
 
     if (!isAdmin && !isSamePerson)
       throw new HTTPException(401, { message: "Unauthorized" })

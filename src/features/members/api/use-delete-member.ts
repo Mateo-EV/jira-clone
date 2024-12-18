@@ -12,7 +12,7 @@ type ResponseType = InferResponseType<
 export function useDeleteMember(memberId: string, workspaceId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<ResponseType, Error>({
+  return useMutation<ResponseType, string>({
     mutationFn: async () => {
       const response = await client.api.members[":workspaceId"][":memberId"][
         "$delete"
@@ -30,8 +30,8 @@ export function useDeleteMember(memberId: string, workspaceId: string) {
       toast.success("Member deleted")
       queryClient.invalidateQueries({ queryKey: ["members", workspaceId] })
     },
-    onError: () => {
-      toast.error("Failed to delete member")
+    onError: msg => {
+      toast.error(msg)
     }
   })
 }

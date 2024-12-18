@@ -15,6 +15,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import useWorkspaceId from "@/features/workspaces/hooks/use-workspace-id"
+import { useDeleteMember } from "../api/use-delete-member"
+import { useUpdateMember } from "../api/use-update-member"
+import { useConfirm } from "@/hooks/use-confirm"
 
 type MembersListProps = {
   workspaceId: string
@@ -37,55 +41,93 @@ export default function MembersList({ workspaceId }: MembersListProps) {
       </div>
       <CardContent className="p-7">
         {members.map((member, index) => (
-          <Fragment key={member.userId}>
-            <div className="flex items-center gap-2">
-              <MemberAvatar
-                name={member.user.name}
-                className="size-10"
-                fallbackClassName="text-lg"
-              />
-              <div className="flex flex-col">
-                <p className="text-sm font-medium">{member.user.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {member.user.email}
-                </p>
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="ml-auto" variant="secondary" size="icon">
-                    <MoreVerticalIcon className="text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="end">
-                  <DropdownMenuItem
-                    className="font-medium"
-                    disabled={false}
-                    onClick={() => {}}
-                  >
-                    Set as Administrator
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="font-medium"
-                    disabled={false}
-                    onClick={() => {}}
-                  >
-                    Set as Member
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="font-medium text-destructive focus:text-destructive"
-                    disabled={false}
-                    onClick={() => {}}
-                  >
-                    Remove {member.user.name}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          <Fragment key={index}>
+            <MemberItem
+              name={member.user.name}
+              email={member.user.email}
+              memberId={member.userId}
+            />
             {index < members.length - 1 && <Separator className="my-2.5" />}
           </Fragment>
         ))}
       </CardContent>
     </Card>
+  )
+}
+
+function MemberItem({
+  memberId,
+  name,
+  email
+}: {
+  memberId: string
+  name: string
+  email: string
+}) {
+  const workspaceId = useWorkspaceId()
+  const { mutate: deleteMember, isPending: isDeletingMember } = useDeleteMember(
+    memberId,
+    workspaceId
+  )
+  const { mutate: updateMemberRole, isPending: isUpdatingMember } =
+    useUpdateMember(memberId, workspaceId)
+
+  const [ConfirmDialog, confirm] = useConfirm(
+    "Remove member",
+    "This member will be remove from the workspace",
+    "destructive"
+  )
+
+  async function handleDeleteMember() {
+    const ok = await confirm()
+    if (!ok) return
+
+    deleteMember()
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <ConfirmDialog />
+      <MemberAvatar
+        name={name}
+        className="size-10"
+        fallbackClassName="text-lg"
+      />
+      <div className="flex flex-col">
+        <p className="text-sm font-medium">{name}</p>
+        <p className="text-xs text-muted-foreground">{email}</p>
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="ml-auto" variant="secondary" size="icon">
+            <MoreVerticalIcon className="text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="bottom" align="end">
+          <DropdownMenuItem
+            className="font-medium"
+            disabled={isUpdatingMember}
+            onClick={() => updateMemberRole({ role: "admin" })}
+          >
+            Set as Administrator
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="font-medium"
+            disabled={isUpdatingMember}
+            onClick={() => updateMemberRole({ role: "member" })}
+          >
+            Set as Member
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="font-medium text-destructive focus:text-destructive"
+            disabled={isDeletingMember}
+            onClick={handleDeleteMember}
+          >
+            Remove {name}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
