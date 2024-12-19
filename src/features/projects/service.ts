@@ -30,3 +30,17 @@ export async function getProjectById(
     })) ?? null
   )
 }
+
+export async function updateProjectById(
+  projectId: string,
+  project: Undefine<typeof projectsTable.$inferSelect>
+) {
+  await db
+    .update(projectsTable)
+    .set(project)
+    .where(eq(projectsTable.id, projectId))
+}
+
+export async function deleteProjectById(projectId: string) {
+  await db.delete(projectsTable).where(eq(projectsTable.id, projectId))
+}

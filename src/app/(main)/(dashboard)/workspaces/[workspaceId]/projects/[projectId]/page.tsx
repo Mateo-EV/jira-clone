@@ -43,7 +43,9 @@ export default async function ProjectPage({
         </div>
         <div>
           <Button variant="secondary" size="sm" asChild>
-            <Link href={`/workspaces/${workspaceId}/projects/${project.id}`}>
+            <Link
+              href={`/workspaces/${workspaceId}/projects/${project.id}/settings`}
+            >
               <PencilIcon className="size-4 mr-2" />
               Edit project
             </Link>

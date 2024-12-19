@@ -108,6 +108,7 @@ export const projectsTable = pgTable(
     })
       .notNull()
       .defaultNow()
+      .$onUpdate(() => new Date())
   },
   t => ({
     lastModifiedIndex: index().on(t.lastModifiedAt)
