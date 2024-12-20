@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
-import { projectsTable } from "@/lib/db/schema"
-import { desc, eq } from "drizzle-orm"
+import { projectsTable, tasksTable } from "@/lib/db/schema"
+import { and, desc, eq, ilike, sql } from "drizzle-orm"
 
 export async function getProjectsByWorkspace(
   workspaceId: string,
@@ -43,4 +43,37 @@ export async function updateProjectById(
 
 export async function deleteProjectById(projectId: string) {
   await db.delete(projectsTable).where(eq(projectsTable.id, projectId))
+}
+
+interface GetTaskFilteredProps {
+  workspaceId: string
+  projectId?: string | null
+  status?: number | null
+  assigneeId?: string | null
+  search?: string | null
+  dueDate?: Date | null
+}
+
+export async function getTaskFilteredWithAsigneesAndMembers({
+  workspaceId,
+  projectId,
+  assigneeId,
+  dueDate,
+  search,
+  status
+}: GetTaskFilteredProps) {
+  return await db.query.tasksTable.findMany({
+    where: and(
+      eq(tasksTable.workspaceId, workspaceId),
+      projectId ? eq(tasksTable.projectId, projectId) : undefined,
+      assigneeId ? eq(tasksTable.assigneeId, assigneeId) : undefined,
+      status ? eq(tasksTable.status, status) : undefined,
+      dueDate ? eq(tasksTable.dueDate, dueDate) : undefined,
+      search ? ilike(tasksTable.name, sql`%${search}%`) : undefined
+    ),
+    with: {
+      assignee: { columns: { id: true, name: true, email: true } },
+      project: true
+    }
+  })
 }

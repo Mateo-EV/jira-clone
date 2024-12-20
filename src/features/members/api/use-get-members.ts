@@ -1,4 +1,5 @@
 import { client } from "@/lib/rpc"
+import { sleep } from "@/utils"
 import { useSuspenseQuery } from "@tanstack/react-query"
 
 export default function useGetMembers(workspaceId: string) {
@@ -10,7 +11,7 @@ export default function useGetMembers(workspaceId: string) {
       if (!response.ok) {
         throw new Error("Failed to fetch members")
       }
-
+      await sleep(10000)
       const { data } = await response.json()
 
       return data

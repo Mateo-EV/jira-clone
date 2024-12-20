@@ -2,8 +2,10 @@ import Navbar from "@/components/navbar"
 import Sidebar from "@/components/sidebar"
 import { getSession } from "@/features/auth/server/next-session"
 import { isUserMember } from "@/features/members/server/next-member"
+import { getMembersWithUserByWorkspace } from "@/features/members/service"
 import CreateProjectModal from "@/features/projects/components/create-project-modal"
 import { getProjectsByWorkspace } from "@/features/projects/service"
+import CreateTaskModal from "@/features/tasks/components/create-task-modal"
 import CreateWorkspaceModal from "@/features/workspaces/components/create-workspace-modal"
 import { getWorkspacesByUser } from "@/features/workspaces/service"
 import { getQueryClient } from "@/lib/query"
@@ -44,11 +46,17 @@ export default async function DashboardLayout({
       })
   })
 
+  void queryClient.prefetchQuery({
+    queryKey: ["members", workspaceId],
+    queryFn: async () => await getMembersWithUserByWorkspace(workspaceId)
+  })
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="min-h-screen">
         <CreateWorkspaceModal />
         <CreateProjectModal />
+        <CreateTaskModal />
         <div className="flex size-full">
           <div className="fixed left-0 top-0 hidden lg:block lg:w-[264px] overflow-y-auto bottom-0">
             <Sidebar />
