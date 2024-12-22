@@ -167,7 +167,7 @@ export const tasksTableRelations = relations(tasksTable, ({ one }) => ({
     references: [projectsTable.id]
   }),
   assignee: one(usersTable, {
-    fields: [tasksTable.projectId],
+    fields: [tasksTable.assigneeId],
     references: [usersTable.id]
   })
 }))

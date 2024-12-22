@@ -26,7 +26,7 @@ const taskRouter = new Hono()
         workspaceId: z.string(),
         projectId: z.string().nullish(),
         assigneeId: z.string().nullish(),
-        status: z
+        status: z.coerce
           .number()
           .int()
           .refine(e => TASK_STATUS[e] !== undefined, {

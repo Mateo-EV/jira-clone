@@ -5,11 +5,11 @@ import { useQuery } from "@tanstack/react-query"
 
 type UseGetTasksProps = {
   workspaceId: string
-  projectId?: string
-  assigneeId?: string
-  status?: string
-  search?: string
-  dueDate?: string
+  projectId?: string | null
+  assigneeId?: string | null
+  status?: number | null
+  search?: string | null
+  dueDate?: string | null
 }
 
 export default function useGetTasks(query: UseGetTasksProps) {
@@ -17,7 +17,14 @@ export default function useGetTasks(query: UseGetTasksProps) {
     queryKey: ["tasks", query],
     queryFn: async () => {
       const response = await client.api.tasks.$get({
-        query
+        query: {
+          workspaceId: query.workspaceId,
+          projectId: query.projectId ?? undefined,
+          assigneeId: query.assigneeId ?? undefined,
+          search: query.search ?? undefined,
+          status: query.status?.toString() ?? undefined,
+          dueDate: query.dueDate ?? undefined
+        }
       })
 
       if (!response.ok) {
@@ -25,6 +32,7 @@ export default function useGetTasks(query: UseGetTasksProps) {
       }
 
       const { data } = await response.json()
+      console.log(data)
 
       return data
     }
