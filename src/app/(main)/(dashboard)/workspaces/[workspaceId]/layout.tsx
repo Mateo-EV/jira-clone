@@ -6,6 +6,7 @@ import { getMembersWithUserByWorkspace } from "@/features/members/service"
 import CreateProjectModal from "@/features/projects/components/create-project-modal"
 import { getProjectsByWorkspace } from "@/features/projects/service"
 import CreateTaskModal from "@/features/tasks/components/create-task-modal"
+import EditTaskModal from "@/features/tasks/components/edit-task-modal"
 import CreateWorkspaceModal from "@/features/workspaces/components/create-workspace-modal"
 import { getWorkspacesByUser } from "@/features/workspaces/service"
 import { getQueryClient } from "@/lib/query"
@@ -57,6 +58,7 @@ export default async function DashboardLayout({
         <CreateWorkspaceModal />
         <CreateProjectModal />
         <CreateTaskModal />
+        <EditTaskModal />
         <div className="flex size-full">
           <div className="fixed left-0 top-0 hidden lg:block lg:w-[264px] overflow-y-auto bottom-0">
             <Sidebar />

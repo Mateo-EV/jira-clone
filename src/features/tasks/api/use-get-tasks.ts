@@ -32,7 +32,6 @@ export default function useGetTasks(query: UseGetTasksProps) {
       }
 
       const { data } = await response.json()
-      console.log(data)
 
       return data
     }
