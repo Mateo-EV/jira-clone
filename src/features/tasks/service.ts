@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { tasksTable } from "@/lib/db/schema"
-import { and, asc, eq, ilike, sql } from "drizzle-orm"
+import { and, asc, eq, ilike, inArray, sql } from "drizzle-orm"
 
 export async function getHighestPositionTaskByWorkspaceIdAndStatus(
   workspaceId: string,
@@ -93,5 +93,11 @@ export async function getTaskFilteredWithAsigneeAndProject({
       assignee: { columns: { id: true, name: true, email: true } },
       project: true
     }
+  })
+}
+
+export async function getTasksByIds(taskIds: string[]) {
+  return await db.query.tasksTable.findMany({
+    where: inArray(tasksTable.id, taskIds)
   })
 }

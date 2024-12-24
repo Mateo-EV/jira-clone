@@ -12,4 +12,4 @@ export const TASK_STATUS_LABELLED = [
   "In Review",
   "Todo",
   "Done"
-]
+] as const

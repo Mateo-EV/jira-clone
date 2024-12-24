@@ -14,6 +14,8 @@ import DataFilters from "./data-filters"
 import useTaskFilters from "../hooks/use-task-filter"
 import { DataTable } from "./datatable"
 import { columns } from "./datatable/columns"
+import DataKanban from "./kanban/data-kanban"
+import useBulkUpdateTasks from "../api/use-bulk-update-tasks"
 
 export default function TaskViewSwitcher() {
   const workspaceId = useWorkspaceId()
@@ -33,6 +35,14 @@ export default function TaskViewSwitcher() {
   })
 
   const { setOpen } = useCreateTaskModal()
+
+  const { mutate: bulkUpdateTasks } = useBulkUpdateTasks()
+
+  const onKanbanChange = (
+    tasks: { id: string; status: number; position: number }[]
+  ) => {
+    bulkUpdateTasks(tasks)
+  }
 
   return (
     <Tabs
@@ -77,7 +87,7 @@ export default function TaskViewSwitcher() {
               <DataTable columns={columns} data={tasks ?? []} />
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
-              Data Kanban
+              <DataKanban data={tasks ?? []} onChange={onKanbanChange} />
             </TabsContent>
             <TabsContent value="calendar" className="mt-0">
               Data calendar

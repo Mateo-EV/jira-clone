@@ -15,6 +15,7 @@ import {
   getTaskById,
   getTaskByIdWithAsigneeAndProject,
   getTaskFilteredWithAsigneeAndProject,
+  getTasksByIds,
   updateTaskById
 } from "../service"
 
@@ -183,6 +184,52 @@ const taskRouter = new Hono()
       await updateTaskById(taskId, taskData)
 
       return c.json({ data: { ...taskData, workspaceId: task.workspaceId } })
+    }
+  )
+  .post(
+    "/bulk-update",
+    sessionMiddleware,
+    zValidator(
+      "json",
+      z
+        .array(
+          z.object({
+            id: z.string(),
+            status: z.coerce.number().int().min(0).max(4),
+            position: z.number().int().positive().min(1000).max(1_000_000)
+          })
+        )
+        .min(1)
+        .max(3)
+    ),
+    async c => {
+      const user = c.get("user")
+      const tasksFromClient = c.req.valid("json")
+
+      const tasks = await getTasksByIds(tasksFromClient.map(t => t.id))
+
+      if (tasksFromClient.length !== tasks.length) throw new HTTPException(400)
+
+      const workspaceIds = new Set(tasks.map(t => t.workspaceId))
+
+      if (workspaceIds.size !== 1)
+        throw new HTTPException(400, {
+          message: "All tasks must belong to the same workspace"
+        })
+
+      const workspaceId = workspaceIds.values().next().value!
+
+      const member = await getMemberByUserAndWorkspace(user.id, workspaceId)
+
+      if (!member) throw new HTTPException(401, { message: "Unauthorized" })
+
+      await Promise.all(
+        tasksFromClient.map(async ({ id, position, status }) => {
+          await updateTaskById(id, { status, position })
+        })
+      )
+
+      return c.json({ data: { tasks: tasksFromClient, workspaceId } })
     }
   )
   .get("/:taskId", sessionMiddleware, async c => {
